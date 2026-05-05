@@ -1,0 +1,32 @@
+<Window x:Class="HairSalonApp.HairstyleForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hairstyle Details" Height="380" Width="350"
+        WindowStartupLocation="CenterOwner"
+        Closing="Window_Closing">
+    <StackPanel Margin="15">
+
+        <TextBlock Text="Hairstyle name:"/>
+        <TextBox x:Name="txtName" Margin="0,0,0,10" Padding="2"/>
+
+        <TextBlock Text="Client type:"/>
+        <ComboBox x:Name="cmbClientType" Margin="0,0,0,10" Padding="2"/>
+
+        <TextBlock Text="Hairdresser first name:"/>
+        <TextBox x:Name="txtHairdresserFirstName" Margin="0,0,0,10" Padding="2"/>
+
+        <TextBlock Text="Hairdresser last name:"/>
+        <TextBox x:Name="txtHairdresserLastName" Margin="0,0,0,10" Padding="2"/>
+
+        <TextBlock Text="Price (UAH):"/>
+        <TextBox x:Name="txtPrice" Margin="0,0,0,10" Padding="2"/>
+
+        <CheckBox x:Name="chkNeedsAdditional" Content="Needs additional services" Margin="0,0,0,20"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="btnSave" Content="Save and Close" Width="130" Margin="0,0,10,0" Click="btnSave_Click"/>
+            <Button x:Name="btnCancel" Content="Cancel and Close" Width="130" Click="btnCancel_Click"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

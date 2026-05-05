@@ -1,0 +1,34 @@
+﻿<Window x:Class="HairSalonApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hair Salon - Main Window" Height="450" Width="800"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing">
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="SalonInfoTextBlock" Grid.Row="0" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+
+        <DataGrid x:Name="HairstylesDataGrid" Grid.Row="1" AutoGenerateColumns="False" 
+                  SelectionMode="Single" IsReadOnly="True"
+                  SelectionChanged="HairstylesDataGrid_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Client Category" Binding="{Binding ClientCategory}" Width="150"/>
+                <DataGridTextColumn Header="Hairdresser" Binding="{Binding Hairdresser.LastName}" Width="120"/>
+                <DataGridTextColumn Header="Price (UAH)" Binding="{Binding Price}" Width="100"/>
+                <DataGridCheckBoxColumn Header="Additional Services" Binding="{Binding NeedsAdditionalServices}" Width="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+            <Button x:Name="BtnAdd" Content="Add" Width="100" Height="30" Margin="0,0,10,0" Click="BtnAdd_Click"/>
+            <Button x:Name="BtnEdit" Content="Edit" Width="100" Height="30" IsEnabled="False" Click="BtnEdit_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
