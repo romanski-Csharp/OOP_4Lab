@@ -1,52 +1,39 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Windows;
 using HairSalonApp.Models;
+using HairSalonApp.DTOs;
 
 namespace HairSalonApp.Services
 {
     public class SalonDataManager
     {
         private readonly string _filePath = "salon_data.json";
-        private readonly JsonSerializerOptions _options;
-
-        public SalonDataManager()
-        {
-            _options = new JsonSerializerOptions
-            {
-                WriteIndented = true, 
-                ReferenceHandler = ReferenceHandler.Preserve, 
-                PropertyNameCaseInsensitive = true
-            };
-        }
+        private readonly JsonSerializerOptions _options = new JsonSerializerOptions { WriteIndented = true };
 
         public void SaveData(HairSalon salon)
         {
             try
             {
-                string jsonString = JsonSerializer.Serialize(salon, _options);
+                var dto = SalonMapper.ToDTO(salon);
+                string jsonString = JsonSerializer.Serialize(dto, _options);
                 File.WriteAllText(_filePath, jsonString);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error saving data: {ex.Message}");
+                MessageBox.Show($"Error saving: {ex.Message}");
             }
         }
 
         public HairSalon LoadData()
         {
-            if (!File.Exists(_filePath))
-            {
-                return new HairSalon(1); 
-            }
-
+            if (!File.Exists(_filePath)) return new HairSalon(1);
             try
             {
                 string jsonString = File.ReadAllText(_filePath);
-                var salon = JsonSerializer.Deserialize<HairSalon>(jsonString, _options);
-
-                return salon ?? new HairSalon(1);
+                var dto = JsonSerializer.Deserialize<HairSalonDTO>(jsonString, _options);
+                return dto != null ? SalonMapper.ToModel(dto) : new HairSalon(1);
             }
             catch (Exception)
             {

@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Windows;
-using HairSalonApp.DTOs;
 using HairSalonApp.Models;
 
 namespace HairSalonApp
@@ -8,29 +7,85 @@ namespace HairSalonApp
     public partial class HairstyleForm : Window
     {
         public Hairstyle ResultHairstyle { get; private set; }
-
         private bool _isClosedByButton = false;
 
-        public HairstyleForm(Hairstyle existingHairstyle = null)
+        public HairstyleForm(List<Hairdresser> existingMasters, Hairstyle existingHairstyle = null)
         {
             InitializeComponent();
 
-            cmbClientType.ItemsSource = Enum.GetValues(typeof(ClientType));
-            cmbClientType.SelectedIndex = 0;
+            InitializeClientTypes();
+            InitializeHairdressersList(existingMasters);
 
             if (existingHairstyle != null)
             {
-                txtName.Text = existingHairstyle.Name;
-                cmbClientType.SelectedItem = existingHairstyle.ClientCategory;
+                LoadExistingHairstyleData(existingHairstyle, existingMasters);
+            }
+        }
 
-                if (existingHairstyle.Hairdresser != null)
-                {
-                    txtHairdresserFirstName.Text = existingHairstyle.Hairdresser.FirstName;
-                    txtHairdresserLastName.Text = existingHairstyle.Hairdresser.LastName;
-                }
+        private void InitializeClientTypes()
+        {
+            cmbClientType.ItemsSource = Enum.GetValues(typeof(ClientType));
+            cmbClientType.SelectedIndex = 0;
+        }
 
-                txtPrice.Text = existingHairstyle.Price.ToString();
-                chkNeedsAdditional.IsChecked = existingHairstyle.NeedsAdditionalServices;
+        private void InitializeHairdressersList(List<Hairdresser> masters)
+        {
+            cmbExistingHairdressers.ItemsSource = masters;
+
+            if (masters.Any())
+            {
+                cmbExistingHairdressers.SelectedIndex = 0;
+                chkNewHairdresser.IsChecked = false;
+            }
+            else
+            {
+                chkNewHairdresser.IsChecked = true;
+            }
+        }
+
+        private void LoadExistingHairstyleData(Hairstyle hairstyle, List<Hairdresser> masters)
+        {
+            txtName.Text = hairstyle.Name;
+            cmbClientType.SelectedItem = hairstyle.ClientCategory;
+            txtPrice.Text = hairstyle.Price.ToString();
+            chkNeedsAdditional.IsChecked = hairstyle.NeedsAdditionalServices;
+
+            SelectOrEnterHairdresser(hairstyle.Hairdresser, masters);
+        }
+
+        private void SelectOrEnterHairdresser(Hairdresser hairdresser, List<Hairdresser> masters)
+        {
+            if (hairdresser == null) return;
+
+            var match = masters.FirstOrDefault(m =>
+                m.FirstName == hairdresser.FirstName &&
+                m.LastName == hairdresser.LastName);
+
+            if (match != null)
+            {
+                cmbExistingHairdressers.SelectedItem = match;
+                chkNewHairdresser.IsChecked = false;
+            }
+            else
+            {
+                chkNewHairdresser.IsChecked = true;
+                txtHairdresserFirstName.Text = hairdresser.FirstName;
+                txtHairdresserLastName.Text = hairdresser.LastName;
+            }
+        }
+
+        private void ToggleHairdresserInput(object sender, RoutedEventArgs e)
+        {
+            bool isNew = chkNewHairdresser.IsChecked ?? false;
+
+            stackNewHairdresser.IsEnabled = isNew;
+            stackNewHairdresser.Opacity = isNew ? 1.0 : 0.5;
+            cmbExistingHairdressers.IsEnabled = !isNew;
+
+            if (!isNew)
+            {
+                txtHairdresserFirstName.Clear();
+                txtHairdresserLastName.Clear();
             }
         }
 
@@ -51,6 +106,21 @@ namespace HairSalonApp
             this.Close();
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!_isClosedByButton)
+            {
+                MessageBoxResult result = MessageBox.Show("Do you want to save changes?", "Warning", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    if (TrySaveData()) this.DialogResult = true;
+                    else e.Cancel = true;
+                }
+                else if (result == MessageBoxResult.Cancel) e.Cancel = true;
+                else this.DialogResult = false;
+            }
+        }
+
         private bool TrySaveData()
         {
             if (!int.TryParse(txtPrice.Text, out int price))
@@ -59,25 +129,38 @@ namespace HairSalonApp
                 return false;
             }
 
-            var hairdresser = new Hairdresser
+            Hairdresser selectedMaster;
+            var results = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+
+            if (chkNewHairdresser.IsChecked == true)
             {
-                FirstName = txtHairdresserFirstName.Text,
-                LastName = txtHairdresserLastName.Text
-            };
+                selectedMaster = new Hairdresser
+                {
+                    FirstName = txtHairdresserFirstName.Text,
+                    LastName = txtHairdresserLastName.Text
+                };
+
+                var hdContext = new ValidationContext(selectedMaster);
+                Validator.TryValidateObject(selectedMaster, hdContext, results, true);
+            }
+            else
+            {
+                selectedMaster = cmbExistingHairdressers.SelectedItem as Hairdresser;
+                if (selectedMaster == null)
+                {
+                    MessageBox.Show("Please select an existing hairdresser or add a new one.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return false;
+                }
+            }
 
             var hairstyle = new Hairstyle
             {
                 Name = txtName.Text,
                 ClientCategory = (ClientType)cmbClientType.SelectedItem,
-                Hairdresser = hairdresser,
+                Hairdresser = selectedMaster,
                 Price = price,
                 NeedsAdditionalServices = chkNeedsAdditional.IsChecked ?? false
             };
-
-            var results = new List<ValidationResult>();
-
-            var hdContext = new ValidationContext(hairdresser);
-            Validator.TryValidateObject(hairdresser, hdContext, results, true);
 
             var hsContext = new ValidationContext(hairstyle);
             Validator.TryValidateObject(hairstyle, hsContext, results, true);
@@ -91,34 +174,6 @@ namespace HairSalonApp
 
             ResultHairstyle = hairstyle;
             return true;
-        }
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (!_isClosedByButton)
-            {
-                MessageBoxResult result = MessageBox.Show("Do you want to save changes?", "Warning", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    if (TrySaveData())
-                    {
-                        this.DialogResult = true;
-                    }
-                    else
-                    {
-                        e.Cancel = true;
-                    }
-                }
-                else if (result == MessageBoxResult.Cancel)
-                {
-                    e.Cancel = true;
-                }
-                else
-                {
-                    this.DialogResult = false;
-                }
-            }
         }
     }
 }

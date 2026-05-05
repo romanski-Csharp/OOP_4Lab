@@ -34,7 +34,7 @@ namespace HairSalonApp
 
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-            HairstyleForm form = new HairstyleForm();
+            HairstyleForm form = new HairstyleForm(GetUniqueMasters());
             form.Owner = this;
 
             if (form.ShowDialog() == true)
@@ -48,7 +48,7 @@ namespace HairSalonApp
         {
             if (HairstylesDataGrid.SelectedItem is Hairstyle selectedHairstyle)
             {
-                HairstyleForm form = new HairstyleForm(selectedHairstyle);
+                HairstyleForm form = new HairstyleForm(GetUniqueMasters(), selectedHairstyle);
                 form.Owner = this;
 
                 if (form.ShowDialog() == true)
@@ -61,6 +61,14 @@ namespace HairSalonApp
                     }
                 }
             }
+        }
+
+        private List<Hairdresser> GetUniqueMasters()
+        {
+            return _currentSalon.CompletedHairstyles
+                                .Select(h => h.Hairdresser)
+                                .Distinct()
+                                .ToList();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
