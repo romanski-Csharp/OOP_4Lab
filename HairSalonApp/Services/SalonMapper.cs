@@ -7,24 +7,38 @@ namespace HairSalonApp.Services
     {
         public static HairSalonDTO ToDTO(HairSalon salon)
         {
-            return new HairSalonDTO
+            var dto = new HairSalonDTO
             {
                 SalonNumber = salon.SalonNumber,
                 CurrentDate = salon.CurrentDate,
-                AdditionalServicesPrice = HairSalon.AdditionalServicesPrice,
-                CompletedHairstyles = salon.CompletedHairstyles.Select(h => new HairstyleDTO
+                AdditionalServicesPrice = HairSalon.AdditionalServicesPrice
+            };
+
+            var hairdresserDtoCache = new Dictionary<Hairdresser, HairdresserDTO>();
+
+            foreach (var h in salon.CompletedHairstyles)
+            {
+                if (!hairdresserDtoCache.TryGetValue(h.Hairdresser, out var hdDto))
+                {
+                    hdDto = new HairdresserDTO
+                    {
+                        FirstName = h.Hairdresser.FirstName,
+                        LastName = h.Hairdresser.LastName
+                    };
+                    hairdresserDtoCache[h.Hairdresser] = hdDto;
+                }
+
+                dto.CompletedHairstyles.Add(new HairstyleDTO
                 {
                     Name = h.Name,
                     ClientCategoryIndex = (int)h.ClientCategory,
                     Price = h.Price,
                     NeedsAdditionalServices = h.NeedsAdditionalServices,
-                    Hairdresser = new HairdresserDTO
-                    {
-                        FirstName = h.Hairdresser.FirstName,
-                        LastName = h.Hairdresser.LastName
-                    }
-                }).ToList()
-            };
+                    Hairdresser = hdDto
+                });
+            }
+
+            return dto;
         }
 
         public static HairSalon ToModel(HairSalonDTO dto)

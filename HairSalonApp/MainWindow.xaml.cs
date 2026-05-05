@@ -16,10 +16,15 @@ namespace HairSalonApp
             _dataManager = new SalonDataManager();
             
             _currentSalon = _dataManager.LoadData();
-            
-            HairstylesDataGrid.ItemsSource = _currentSalon.CompletedHairstyles;
-            
+
+            RefreshDataGrid();
             UpdateSalonInfo();
+        }
+
+        private void RefreshDataGrid()
+        {
+            HairstylesDataGrid.ItemsSource = null;
+            HairstylesDataGrid.ItemsSource = _currentSalon.CompletedHairstyles;
         }
 
         private void UpdateSalonInfo()
@@ -41,6 +46,7 @@ namespace HairSalonApp
             {
                 _currentSalon.AddHairstyle(form.ResultHairstyle);
                 UpdateSalonInfo();
+                RefreshDataGrid();
             }
         }
 
@@ -58,6 +64,7 @@ namespace HairSalonApp
                     {
                         _currentSalon.CompletedHairstyles[index] = form.ResultHairstyle;
                         UpdateSalonInfo();
+                        RefreshDataGrid();
                     }
                 }
             }

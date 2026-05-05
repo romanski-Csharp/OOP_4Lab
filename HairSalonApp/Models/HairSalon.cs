@@ -14,12 +14,12 @@ namespace HairSalonApp.Models
         [Range(0, 5000, ErrorMessage = "The price of additional services cannot be negative or too high.")]
         public static int AdditionalServicesPrice { get; set; } = 150;
 
-        public ObservableCollection<Hairstyle> CompletedHairstyles { get; set; }
+        public List<Hairstyle> CompletedHairstyles { get; set; }
 
         [JsonConstructor]
         public HairSalon()
         {
-            CompletedHairstyles = new ObservableCollection<Hairstyle>();
+            CompletedHairstyles = new List<Hairstyle>();
         }
 
         public HairSalon(int salonNumber)
@@ -31,7 +31,7 @@ namespace HairSalonApp.Models
 
             SalonNumber = salonNumber;
             CurrentDate = DateTime.Now.Date;
-            CompletedHairstyles = new ObservableCollection<Hairstyle>();
+            CompletedHairstyles = new List<Hairstyle>();
         }
 
         public void AddHairstyle(Hairstyle hairstyle)

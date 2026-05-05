@@ -1,16 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
-using HairSalonApp.Models;
 using HairSalonApp.DTOs;
+using HairSalonApp.Models;
 
 namespace HairSalonApp.Services
 {
     public class SalonDataManager
     {
         private readonly string _filePath = "salon_data.json";
-        private readonly JsonSerializerOptions _options = new JsonSerializerOptions { WriteIndented = true };
+        private readonly JsonSerializerOptions _options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            ReferenceHandler = ReferenceHandler.Preserve
+        };
 
         public void SaveData(HairSalon salon)
         {
