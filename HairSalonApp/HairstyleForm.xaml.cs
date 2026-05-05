@@ -59,7 +59,7 @@ namespace HairSalonApp
                 return false;
             }
 
-            Hairdresser hairdresser = new Hairdresser
+            var hairdresser = new Hairdresser
             {
                 FirstName = txtHairdresserFirstName.Text,
                 LastName = txtHairdresserLastName.Text
@@ -69,17 +69,20 @@ namespace HairSalonApp
             {
                 Name = txtName.Text,
                 ClientCategory = (ClientType)cmbClientType.SelectedItem,
-                HairdresserFirstName = txtHairdresserFirstName.Text,
-                HairdresserLastName = txtHairdresserLastName.Text,
+                Hairdresser = hairdresser,
                 Price = price,
                 NeedsAdditionalServices = chkNeedsAdditional.IsChecked ?? false
             };
 
-            var context = new ValidationContext(hairstyle);
             var results = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(hairstyle, context, results, true);
 
-            if (!isValid)
+            var hdContext = new ValidationContext(hairdresser);
+            Validator.TryValidateObject(hairdresser, hdContext, results, true);
+
+            var hsContext = new ValidationContext(hairstyle);
+            Validator.TryValidateObject(hairstyle, hsContext, results, true);
+
+            if (results.Any())
             {
                 string errors = string.Join("\n", results.Select(r => r.ErrorMessage));
                 MessageBox.Show(errors, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
